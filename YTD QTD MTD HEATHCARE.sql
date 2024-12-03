@@ -1,0 +1,152 @@
+create database Healthcare;
+select * from 2016q4;
+select count(*) from 2016q4;
+select * from 2017Q4;
+select * from 2017Q1;
+select * from 2017Q3;
+select * from 2018Q4;
+
+
+
+
+
+
+CREATE TABLE ALL_DATA AS SELECT * FROM
+    2016q4 
+UNION ALL SELECT 
+    *
+FROM
+    2017q1 
+UNION ALL SELECT 
+    *
+FROM
+    2017q2 
+UNION ALL SELECT 
+    *
+FROM
+    2017q3 
+UNION ALL SELECT 
+    *
+FROM
+    2017q4 
+UNION ALL SELECT 
+    *
+FROM
+    2018q1 
+UNION ALL SELECT 
+    *
+FROM
+    2018q2 
+UNION ALL SELECT 
+    *
+FROM
+    2018q3 
+UNION ALL SELECT 
+    *
+FROM
+    2018q4 
+UNION ALL SELECT 
+    *
+FROM
+    2019q1 
+UNION ALL SELECT 
+    *
+FROM
+    2019q2 
+UNION ALL SELECT 
+    *
+FROM
+    2019q3 
+UNION ALL SELECT 
+    *
+FROM
+    2019q4 
+UNION ALL SELECT 
+    *
+FROM
+    2020q1 
+UNION ALL SELECT 
+    *
+FROM
+    2020q2;
+
+
+
+
+
+
+
+SELECT * FROM ALL_DATA;
+
+DESCRIBE ALL_DATA;
+
+
+/------------------------------ CHECK_FORMAT ----------------------------/
+SELECT 
+    BEG_DATE,
+    CASE
+        WHEN SUBSTRING_INDEX(BEG_DATE, '/', 1) > 12 THEN 'DD/MM/YYYY'
+        ELSE 'MM/DD/YYYY'
+    END AS date_format
+FROM
+    ALL_DATA;
+
+UPDATE ALL_DATA
+SET BEG_DATE = REPLACE(BEG_DATE, '-', '/');
+
+
+
+ALTER TABLE ALL_DATA ADD COLUMN BEG_DATE_TEMP DATE;
+
+UPDATE ALL_DATA 
+SET 
+    BEG_DATE_TEMP = STR_TO_DATE(BEG_DATE, '%m/%d/%Y')
+WHERE
+    SUBSTRING_INDEX(BEG_DATE, '/', 1) <= 12;
+
+
+SELECT BEG_DATE, BEG_DATE_TEMP
+FROM ALL_DATA
+WHERE BEG_DATE_TEMP IS NULL;
+
+
+SELECT 
+    YEAR(BEG_DATE_TEMP)
+FROM
+    ALL_DATA;
+
+/************** YEAR *****************/
+SELECT 
+    YEAR(BEG_DATE_TEMP) AS 'YEAR',
+    SUM(NET_TOT) TOTAL_NET_REVENUE
+FROM
+    ALL_DATA
+GROUP BY 1
+ORDER BY 1;
+
+/************** QUARTER *****************/
+SELECT 
+    CONCAT('Q', QUARTER(BEG_DATE_TEMP)) AS 'QUARTER',
+    SUM(NET_TOT) TOTAL_NET_REVENUE
+FROM
+    ALL_DATA
+GROUP BY 1
+ORDER BY 1;
+
+/************** MONTH *****************/
+SELECT 
+    MONTHNAME(BEG_DATE_TEMP), SUM(NET_TOT) TOTAL_NET_REVENUE
+FROM
+    ALL_DATA
+GROUP BY 1
+ORDER BY 2;
+
+/************** YEAR & QUARTER *****************/
+SELECT 
+    YEAR(BEG_DATE_TEMP) AS 'YEAR',
+    CONCAT('Q', QUARTER(BEG_DATE_TEMP)) AS 'QUARTER',
+    SUM(NET_TOT) TOTAL_NET_REVENUE
+FROM
+    ALL_DATA
+GROUP BY 1 , 2
+ORDER BY 1 , 2;
